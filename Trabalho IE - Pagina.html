@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<head>
+<title> Projeto radar de objetos</title>
+</head>
+<body>  
+    <body bgcolor="WhiteSmoke">
+    <body topmargin=2 leftmargin=100>
+<font face="Tahoma"><b><p><h1><center>Radar identificador de objetos</center></h1></p><hr/></b>
+<center>
+        <img src="imagens/projeto%20(2).jpeg" width="300" weigth="300" hspace="20">
+        <img src="imagens/projeto%20(4).jpeg" width="300" weigth="300" hspace="20">
+        <img src="imagens/projeto%20(3).jpeg" width="300" weigth="300" >
+        
+</center>
+
+<h2>Visão geral:</h2>
+
+<p>Basicamente o que foi utilizado para este Projeto Arduino: um Sensor Ultrassônico para detectar os objetos,um pequeno servo motor para girar o sensor e uma placa Arduino para controlá-los.</p>
+
+<h1>O que foi utilizado neste projeto:</h1><p>
+<ul>
+    <table>
+  <tr>
+    <td>  
+        <li>Sensor ultra-sônico HC-SR04</li>
+            <img src="imagens/sensor.jpg" width="200" weigth="200" hspace="30" vspace="20">
+        <li>Micro Servo Motor SG9</li>
+            <img src="imagens/Servo%20Motor.jpg" width="200" weigth="200" hspace="30" vspace="20">
+
+    </td>
+    
+    <td>
+        <li>Placa Arduino</li>
+            <img src="imagens/arduino.jpg" width="250" weigth="200" hspace="30" vspace="30">
+        <li>Protoboard 1660 pontos</li>
+            <img src="imagens/protoboard.jpg" width="300" weigth="290" hspace="30" vspace="30"> 
+      </td>
+      <td>
+        <li>Jumpers macho e fêmea</li>
+            <img src="imagens/jumper.jpg" width="200" weigth="250" hspace="20" vspace="20">
+          <li>Jumpers macho</li>
+            <img src="imagens/jumper2.jpg" width="250" weigth="200" hspace="30" vspace="20">
+      </td>
+    
+    <td> 
+
+        <li>Cabo R3 para arduino</li>
+            <img src="imagens/cabo.jpg" width="200" weigth="250" hspace="20" vspace="20">
+        <li>Pistola de cola quente</li>
+            <img src="imagens/pistola.jpg" width="200" weigth="150" hspace="20" vspace="20">
+      </td>
+    </tr>
+    </table>
+</ul> 
+<h1>Construindo o dispositivo:</h1>
+
+    Primeiramente foram fixadas as principais componentes na protoboard e o sensor ultra-sônico no suporte do servo motor utilizando cola quente. Depois foi montado o circuito e conectado o arduino ao computador.
+
+<h2>Esquema de circuito:</h2>
+
+Assim, foi conectado o Sensor Ultrassônico HC-SR04 aos pinos 10 e 11 e o servomotor ao pino 12 da Placa Arduino.
+
+<p><img src="imagens/radar circuit.png" width="500" weigth="800"></p>
+
+<h2>Código fonte</h2>
+
+Depois de pronto, é necessario enviar um código para o Arduino Board que permitirá a interação entre o Arduino e o IDE de processamento.
+        <img src="imagens/processamento.png" width="1000" weigth="800" vspace="30">
+<p><b> Aqui está o código fonte do Arduino com a descrição de cada linha:</b></p>
+
+<pre class="EnlighterJSRAW " data-enlighter-language="cpp"><i><font color="Navy">// Includes the Servo library
+#include &lt;Servo.h&gt;. 
+
+// Defines Tirg and Echo pins of the Ultrasonic Sensor
+const int trigPin = 10;
+const int echoPin = 11;
+// Variables for the duration and the distance
+long duration;
+int distance;
+
+Servo myServo; // Creates a servo object for controlling the servo motor
+
+void setup() {
+  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPin, INPUT); // Sets the echoPin as an Input
+  Serial.begin(9600);
+  myServo.attach(12); // Defines on which pin is the servo motor attached
+}
+void loop() {
+  // rotates the servo motor from 15 to 165 degrees
+  for(int i=15;i&lt;=165;i++){  
+  myServo.write(i);
+  delay(40);
+  distance = calculateDistance();// Calls a function for calculating the distance measured by the Ultrasonic sensor for each degree
+  
+  Serial.print(i); // Sends the current degree into the Serial Port
+  Serial.print(","); // Sends addition character right next to the previous value needed later in the Processing IDE for indexing
+  Serial.print(distance); // Sends the distance value into the Serial Port
+  Serial.print("."); // Sends addition character right next to the previous value needed later in the Processing IDE for indexing
+  }
+  // Repeats the previous lines from 165 to 15 degrees
+  for(int i=165;i&gt;15;i--){  
+  myServo.write(i);
+  delay(40);
+  distance = calculateDistance();
+  Serial.print(i);
+  Serial.print(",");
+  Serial.print(distance);
+  Serial.print(".");
+  }
+}
+// Function for calculating the distance measured by the Ultrasonic sensor
+int calculateDistance(){ 
+  
+  digitalWrite(trigPin, LOW); 
+  delayMicroseconds(2);
+  // Sets the trigPin on HIGH state for 10 micro seconds
+  digitalWrite(trigPin, HIGH); 
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  duration = pulseIn(echoPin, HIGH); // Reads the echoPin, returns the sound wave travel time in microseconds
+  distance= duration*0.034/2;
+  return distance;
+}</pre><p></i>
+</font> 
+<br>Para desenhar o radar, foi utilizado o programa "Processing". Assim, foi necessário receber os valores para o ângulo e a distância medida pelo sensor da placa do Arduino para o IDE de processamento usando 
+a função SerialEvent () que lê os dados da porta serial e coloca os valores do ângulo e da distância nas variáveis iAngle e iDistance. 
+Essas variáveis foram usadas para desenhar o radar, as linhas, os objetos detectados e parte do texto.</p>
+    
+
+        </p><pre class="EnlighterJSRAW " data-enlighter-language="cpp"><i><font color="Navy">void drawRadar() {
+  pushMatrix();
+  translate(960,1000); // moves the starting coordinats to new location
+  noFill();
+  strokeWeight(2);
+  stroke(98,245,31);
+  // draws the arc lines
+  arc(0,0,1800,1800,PI,TWO_PI);
+  arc(0,0,1400,1400,PI,TWO_PI);
+  arc(0,0,1000,1000,PI,TWO_PI);
+  arc(0,0,600,600,PI,TWO_PI);
+  // draws the angle lines
+  line(-960,0,960,0);
+  line(0,0,-960*cos(radians(30)),-960*sin(radians(30)));
+  line(0,0,-960*cos(radians(60)),-960*sin(radians(60)));
+  line(0,0,-960*cos(radians(90)),-960*sin(radians(90)));
+  line(0,0,-960*cos(radians(120)),-960*sin(radians(120)));
+  line(0,0,-960*cos(radians(150)),-960*sin(radians(150)));
+  line(-960*cos(radians(30)),0,960,0);
+  popMatrix();
+}</i></pre><p>
+</font>
+        
+<p>Para desenhar a linha que está se movendo ao longo do radar, foi feito a função drawLine (). Seu centro de rotação foi definido com 
+a função translate () e usando a função line (), na qual a variável iAngle é usada, a linha é redesenhada para cada grau.</p>
+
+<img src="imagens/radar2.jpg">
+
+<p><pre class="EnlighterJSRAW " data-enlighter-language="cpp"><i><font color="Navy">void drawLine() {
+  pushMatrix();
+  strokeWeight(9);
+  stroke(30,250,60);
+  translate(960,1000); // moves the starting coordinats to new location
+  line(0,0,950*cos(radians(iAngle)),-950*sin(radians(iAngle))); // draws the line according to the angle
+  popMatrix();
+}</i></pre></p>
+</font>
+
+<p>Para desenhar os objetos detectados, foi utilizado a função drawObject (). Ela obtém a distância do sensor ultrassônico, transforma-o 
+em pixels e, em combinação com o ângulo do sensor, desenha o objeto no radar.</p>
+<img src="imagens/radar3.jpg">
+
+<p><pre class="EnlighterJSRAW " data-enlighter-language="cpp"><i><font color="Navy">void drawObject() {
+  pushMatrix();
+  translate(960,1000); // moves the starting coordinats to new location
+  strokeWeight(9);
+  stroke(255,10,10); // red color
+  pixsDistance = iDistance*22.5; // covers the distance from the sensor from cm to pixels
+  // limiting the range to 40 cms
+  if(iDistance&lt;40){
+    // draws the object according to the angle and the distance
+  line(pixsDistance*cos(radians(iAngle)),-pixsDistance*sin(radians(iAngle)),950*cos(radians(iAngle)),-950*sin(radians(iAngle)));
+  }
+  popMatrix();
+}</i></pre></p></font>
+
+<p>Para o texto na tela, foi utilizado a função drawText () , que desenha textos em locais específicos. Todas essas funções são 
+chamadas na função draw () principal, que se repete o tempo todo e desenha a tela. Também aqui foi utilizada a 
+função fill () com 2 parâmetros para simular o desfoque de movimento e o desvanecimento lento da linha em movimento.</p>
+
+<p><pre class="EnlighterJSRAW " data-enlighter-language="cpp"><i><font color="Navy">void draw() {
+  
+  fill(98,245,31);
+  textFont(orcFont);
+  // simulating motion blur and slow fade of the moving line
+  noStroke();
+  fill(0,4); 
+  rect(0, 0, width, 1010); 
+  
+  fill(98,245,31); // green color
+  // calls the functions for drawing the radar
+  drawRadar(); 
+  drawLine();
+  drawObject();
+  drawText();
+}</i></pre></p></font>
+
+<p>Aqui está a aparência final do radar:</p>
+
+<img src="imagens/radar4.jpg" width="450" weigth="450"></font>
+
+<font face="Tahoma"><h2>Dificuldades encontradas:<br></h2>
+<p>A maior das dificuldades foi descartada, pois, como não possuia os conhecimentos necessários para a criação dos códigos utilizados, os encontrei prontos no canal Indian LifeHacker. Outras dificuldades foram na montagem das componentes, mas que foi realizada com sucesso!<br></p>
+
+<h2>Projeto concluido:</h2>
+    <center>
+        <img src="imagens/projeto%20(1).jpeg" width="300" weigth="300" hspace="20">
+        <img src="imagens/projeto%20(5).jpeg" width="300" weigth="300" hspace="20">
+        <img src="imagens/projeto%20(8).jpeg" width="300" weigth="300" >
+        
+</center>
+
+</font>
+<font face="Tahoma"><h2>Para acessar o vídeo do projeto em funcionamento clique no link abaixo:</h2>
+<a href="https://www.youtube.com/watch?v=YPxIgxLw4jo&feature=youtu.be">Projeto arduino - radar de objetos</a>
+
+    <p>-</p>
+
+
+</body>
+
+</html>
